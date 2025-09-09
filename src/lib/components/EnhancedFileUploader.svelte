@@ -46,32 +46,35 @@
 	let cols = $state(0);
 	let extractedText = $state('');
 
-	// Watch for changes in pagesPerArticle and useUniformColumns
+	// Watch for changes in pagesPerArticle, useUniformColumns, and cols
 	$effect(() => {
 		if (useUniformColumns) {
 			pageColumns = Array(pagesPerArticle).fill(cols);
 		} else {
 			// Preserve existing values when switching to individual columns
 			const currentCols = [...pageColumns];
-			pageColumns = Array(pagesPerArticle)
+			const newColumns = Array(pagesPerArticle)
 				.fill(0)
 				.map((_, i) => currentCols[i] || 0);
-		}
-	});
-
-	// Watch for changes in cols when using uniform columns
-	$effect(() => {
-		if (useUniformColumns) {
-			pageColumns = Array(pagesPerArticle).fill(cols);
+			
+			// Only update if the array length changed
+			if (newColumns.length !== pageColumns.length) {
+				pageColumns = newColumns;
+			}
 		}
 	});
 
 	function handleFileChange(event: Event) {
 		const input = event.target as HTMLInputElement;
-		if (input.files && input.files[0]) {
+		console.log('File change event triggered:', input.files);
+		
+		if (input.files && input.files.length > 0) {
+			const file = input.files[0];
+			console.log('Selected file:', file.name, file.type, file.size);
+			
 			const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
 
-			if (!validTypes.includes(input.files[0].type)) {
+			if (!validTypes.includes(file.type)) {
 				error = '請上傳 JPG、PNG 或 PDF 檔案';
 				toastStore.add('檔案格式不正確，請上傳 JPG、PNG 或 PDF 檔案', 'error');
 				return;
@@ -80,12 +83,17 @@
 			files = Array.from(input.files);
 			error = '';
 			processedImages = [];
+			console.log('Files updated:', files.length, 'Current step:', currentStep);
+			
 			toastStore.add('檔案上傳成功！請設定參數後開始轉換', 'success');
 
 			// Auto advance to setup step
 			if (currentStep === 0) {
+				console.log('Advancing to step 1');
 				currentStep = 1;
 			}
+		} else {
+			console.log('No files selected or input.files is null');
 		}
 	}
 
