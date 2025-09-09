@@ -80,7 +80,7 @@
 			files = Array.from(input.files);
 			error = '';
 			processedImages = [];
-			toastStore.add('檔案上傳成功！', 'success');
+			toastStore.add('檔案上傳成功！請設定參數後開始轉換', 'success');
 
 			// Auto advance to setup step
 			if (currentStep === 0) {
@@ -161,6 +161,7 @@
 			processTrigger++;
 			currentStep = 2;
 			error = '';
+			toastStore.add('開始轉換處理...', 'info');
 		} catch (err) {
 			console.error('Error processing images:', err);
 			error = '處理圖片時發生錯誤，請重試';
@@ -246,6 +247,21 @@
 					<div class="prose prose-sm mb-6 text-gray-700">
 						<p>請設定作文的網格參數，這將幫助系統正確識別和轉換文字方向。</p>
 					</div>
+
+					<!-- File Status -->
+					{#if files.length > 0}
+						<div class="mb-6 rounded-md border border-blue-200 bg-blue-50 p-4">
+							<div class="flex items-center">
+								<svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+								</svg>
+								<div class="ml-3">
+									<p class="text-sm font-medium text-blue-800">已上傳檔案: {files[0].name}</p>
+									<p class="text-xs text-blue-600">設定完參數後點擊「開始轉換」進行處理</p>
+								</div>
+							</div>
+						</div>
+					{/if}
 
 					<div class="space-y-6">
 						<!-- Basic Parameters -->
@@ -348,6 +364,34 @@
 					<div class="prose prose-sm mb-6 text-gray-700">
 						<p>系統正在處理您的檔案，將直書文字轉換為橫書格式。請耐心等待...</p>
 					</div>
+
+					<!-- Processing Status -->
+					{#if isProcessing}
+						<div class="mb-6 rounded-md border border-yellow-200 bg-yellow-50 p-4">
+							<div class="flex items-center">
+								<svg class="h-5 w-5 animate-spin text-yellow-600" fill="none" viewBox="0 0 24 24">
+									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+								</svg>
+								<div class="ml-3">
+									<p class="text-sm font-medium text-yellow-800">正在處理中...</p>
+									<p class="text-xs text-yellow-600">PDF轉換和圖片旋轉處理需要一些時間，請稍候</p>
+								</div>
+							</div>
+						</div>
+					{:else if processedImages.length > 0}
+						<div class="mb-6 rounded-md border border-green-200 bg-green-50 p-4">
+							<div class="flex items-center">
+								<svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+								</svg>
+								<div class="ml-3">
+									<p class="text-sm font-medium text-green-800">處理完成！</p>
+									<p class="text-xs text-green-600">已成功轉換 {processedImages.length} 個檔案，可以進行AI分析</p>
+								</div>
+							</div>
+						</div>
+					{/if}
 
 					{#if files && files[0]?.type.startsWith('application/') && files?.length == 1}
 						<PDFPreview

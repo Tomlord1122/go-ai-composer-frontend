@@ -119,7 +119,7 @@
 		}
 	}
 
-	// Set up preview URL and convert PDF when file changes
+	// Set up preview URL when file changes (but don't auto-convert)
 	$effect(() => {
 		if (file) {
 			console.log('newFile', file);
@@ -130,7 +130,7 @@
 
 			if (file && file.type === 'application/pdf') {
 				previewUrl = URL.createObjectURL(file);
-				convertPDFToImages(file);
+				// Don't auto-convert - wait for processTrigger
 			} else {
 				previewUrl = '';
 				imageFiles = [];
@@ -140,13 +140,30 @@
 
 	// Process images when trigger changes
 	$effect(() => {
-		if (converted === true && processTrigger > 0) {
-			processImagesAsync();
+		if (processTrigger > 0) {
+			handleProcessingTrigger();
 		}
 	});
 
+	async function handleProcessingTrigger() {
+		// First convert PDF to images if not already converted
+		if (!converted && file && file.type === 'application/pdf') {
+			try {
+				await convertPDFToImages(file);
+			} catch (error) {
+				console.error('Failed to convert PDF:', error);
+				return;
+			}
+		}
+		
+		// Then process the images
+		if (converted && imageFiles.length > 0) {
+			await processImagesAsync();
+		}
+	}
+
 	async function processImagesAsync() {
-		if (converted === true && processTrigger > 0) {
+		if (imageFiles.length > 0 && rows > 0 && pageColumns.length > 0) {
 			// Reset state before reprocessing
 			selectedPages = [];
 			processedImageFiles = [];
@@ -161,8 +178,7 @@
 
 			await tick();
 
-			if (imageFiles.length > 0 && rows > 0 && pageColumns.length > 0) {
-				for (let i = 0; i < imageFiles.length; i += pagesPerArticle) {
+			for (let i = 0; i < imageFiles.length; i += pagesPerArticle) {
 					let results: Mat[] = Array(pagesPerArticle).fill(null);
 					let tempCanvas: HTMLCanvasElement[] = Array(pagesPerArticle).fill(null);
 					await tick();
@@ -222,9 +238,8 @@
 						});
 					}
 				}
-				await tick();
-				onprocessedimages(processedImageFiles);
-			}
+			await tick();
+			onprocessedimages(processedImageFiles);
 		}
 	}
 
