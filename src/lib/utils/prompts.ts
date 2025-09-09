@@ -18,9 +18,6 @@ export const textExtractorPrompt = `【閱讀規則】
 
 【回覆格式（務必遵守）】
 
-【全文】
-<逐字轉寫內容>
-
 【批改】
 內容分：x/6
 墨水分：y/1（字數：n）
