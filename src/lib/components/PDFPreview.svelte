@@ -1,6 +1,6 @@
 <script lang="ts">
-	import cv from "@techstark/opencv-js";
-	import type { Mat } from "@techstark/opencv-js";
+	import cv from '@techstark/opencv-js';
+	import type { Mat } from '@techstark/opencv-js';
 	import getPDF from '../utils/pdf2img.js';
 	import type { PDFDocumentProxy } from 'pdfjs-dist';
 	import { processImage } from '../utils/fileProcessor.js';
@@ -47,14 +47,14 @@
 		converted = false;
 		isConverting = true;
 		conversionError = null;
-		
+
 		try {
 			console.log('file', file);
-			const pdf = await getPDF(file) as PDFDocumentProxy;
+			const pdf = (await getPDF(file)) as PDFDocumentProxy;
 			console.log('Conversion complete');
 			canvases = new Array(pdf.numPages).fill(null);
 			imageFiles = []; // Reset image files array
-			
+
 			for (let i = 0; i < pdf.numPages; i++) {
 				await tick();
 				const page = await pdf.getPage(i + 1);
@@ -72,7 +72,7 @@
 					canvasContext: context,
 					viewport: viewport
 				};
-				
+
 				try {
 					await page.render(renderContext as any).promise;
 					console.log(`Page ${i + 1} rendered successfully`);
@@ -80,9 +80,9 @@
 					console.error(`Error rendering page ${i + 1}:`, renderError);
 					throw new Error(`Failed to render page ${i + 1}`);
 				}
-				
+
 				canvases[i] = canvas;
-				
+
 				// Convert each canvas to image file with error handling
 				try {
 					const blob = await new Promise<Blob | null>((resolve, reject) => {
@@ -91,12 +91,12 @@
 							resolve(b);
 						}, 'image/png');
 					});
-					
+
 					if (!blob) {
 						throw new Error(`Null blob generated for page ${i + 1}`);
 					}
-					
-					const file = new File([blob], `page-${i + 1}.png`, { type: "image/png" });
+
+					const file = new File([blob], `page-${i + 1}.png`, { type: 'image/png' });
 					imageFiles.push(file);
 					console.log(`Successfully converted page ${i + 1} to image`);
 				} catch (blobError) {
@@ -104,10 +104,12 @@
 					throw blobError;
 				}
 			}
-			
-			console.log('All pages converted:', imageFiles.map(f => f.name));
-			converted = true;
 
+			console.log(
+				'All pages converted:',
+				imageFiles.map((f) => f.name)
+			);
+			converted = true;
 		} catch (error) {
 			console.error('Error converting PDF:', error);
 			conversionError = error instanceof Error ? error.message : 'Conversion failed';
@@ -125,7 +127,7 @@
 				URL.revokeObjectURL(previewUrl);
 			}
 			conversionError = null;
-			
+
 			if (file && file.type === 'application/pdf') {
 				previewUrl = URL.createObjectURL(file);
 				convertPDFToImages(file);
@@ -149,16 +151,16 @@
 			selectedPages = [];
 			processedImageFiles = [];
 			successPages = [];
-			
+
 			// Clear previous canvases from the containers
 			const processedContainer = document.querySelector('.processed-images-container');
 			if (processedContainer) processedContainer.innerHTML = '';
-			
+
 			// Cleanup previous processed mats
 			cleanupProcessedMats();
-			
+
 			await tick();
-			
+
 			if (imageFiles.length > 0 && rows > 0 && pageColumns.length > 0) {
 				for (let i = 0; i < imageFiles.length; i += pagesPerArticle) {
 					let results: Mat[] = Array(pagesPerArticle).fill(null);
@@ -168,7 +170,7 @@
 						for (let j = 0; j < pagesPerArticle; j++) {
 							const pageIndex = i + j;
 							if (pageIndex >= imageFiles.length) break;
-							
+
 							results[j] = await processImage(imageFiles[pageIndex], rows, pageColumns[j]);
 							tempCanvas[j] = document.createElement('canvas');
 							tempCanvas[j].width = results[j].cols;
@@ -176,9 +178,9 @@
 							cv.imshow(tempCanvas[j], results[j]);
 						}
 
-						if (tempCanvas.every(canvas => canvas !== null)) {
+						if (tempCanvas.every((canvas) => canvas !== null)) {
 							const fullMergedCanvas = document.createElement('canvas');
-							const maxWidth = Math.max(...results.map(result => result.cols));
+							const maxWidth = Math.max(...results.map((result) => result.cols));
 							const totalHeight = results.reduce((sum, result) => sum + result.rows, 0);
 
 							fullMergedCanvas.width = maxWidth;
@@ -198,15 +200,15 @@
 								fullMergedCanvas.style.maxWidth = '100%';
 								fullMergedCanvas.style.height = 'auto';
 
-								const mergedBlob = await new Promise<Blob>((resolve) => 
-									fullMergedCanvas.toBlob(blob => resolve(blob!), 'image/png')
+								const mergedBlob = await new Promise<Blob>((resolve) =>
+									fullMergedCanvas.toBlob((blob) => resolve(blob!), 'image/png')
 								);
 
 								const pageRange = Array.from(
-									{ length: results.length }, 
+									{ length: results.length },
 									(_, idx) => i + idx + 1
 								).join('-');
-								
+
 								processedImageFiles.push(
 									new File([mergedBlob], `pages-${pageRange}.png`, { type: 'image/png' })
 								);
@@ -215,7 +217,7 @@
 							}
 						}
 					} finally {
-						results.forEach(result => {
+						results.forEach((result) => {
 							if (result) result.delete();
 						});
 					}
@@ -242,7 +244,7 @@
 		container.style.cursor = 'pointer';
 		container.style.transition = 'border 0.2s ease'; // Smooth transition for selection
 		container.style.border = '1px solid #ccc';
-		
+
 		const pageNumber = document.createElement('div');
 		pageNumber.id = `page-number-${pageIndex}`; // Add ID for easy reference
 		pageNumber.textContent = `Page ${pageIndex + 1}`;
@@ -271,7 +273,7 @@
 	// Handle page selection logic
 	function handlePageSelection(pageIndex: number) {
 		console.log('Selected page index:', pageIndex);
-		
+
 		// Check if clicking the same page (toggle selection)
 		if (selectedPages.includes(pageIndex)) {
 			selectedPages = []; // Deselect if clicking the same page
@@ -282,9 +284,9 @@
 			selectedPages = [pageIndex];
 			onselectedpages(pageIndex);
 			onprocessedimages(processedImageFiles);
-			
+
 			// Force immediate update for previous selection
-			previousSelection.forEach(prevIndex => {
+			previousSelection.forEach((prevIndex) => {
 				const prevContainer = document.getElementById(`page-container-${prevIndex}`);
 				const prevPageNumber = document.getElementById(`page-number-${prevIndex}`);
 				if (prevContainer) {
@@ -295,7 +297,7 @@
 				}
 			});
 		}
-		
+
 		// Force update visuals after state change
 		tick().then(() => {
 			updateSelectionVisuals();
@@ -318,7 +320,7 @@
 
 		// Update selected pages only if there are selections
 		if (selectedPages.length > 0) {
-			selectedPages.forEach(index => {
+			selectedPages.forEach((index) => {
 				const container = document.getElementById(`page-container-${index}`);
 				const pageNumber = document.getElementById(`page-number-${index}`);
 				if (container) {
@@ -333,41 +335,39 @@
 </script>
 
 {#if file}
-	<div class="border border-gray-300 rounded-lg overflow-hidden bg-gray-50 shadow-sm">
+	<div class="overflow-hidden rounded-lg border border-gray-300 bg-gray-50 shadow-sm">
 		<div class="p-4">
 			<!-- Conversion Status -->
 			{#if isConverting}
-				<div class="mb-4 text-center text-gray-600">
-					Converting PDF pages to images...
-				</div>
+				<div class="mb-4 text-center text-gray-600">Converting PDF pages to images...</div>
 			{/if}
 
 			<!-- PDF Preview -->
 			<div class="mb-4">
-				<h4 class="text-sm font-medium text-gray-700 mb-2">PDF Preview:</h4>
+				<h4 class="mb-2 text-sm font-medium text-gray-700">PDF Preview:</h4>
 				<iframe
 					src={previewUrl}
-					class="w-full h-[400px] border border-gray-300 rounded-md"
+					class="h-[400px] w-full rounded-md border border-gray-300"
 					title="PDF Preview"
 				></iframe>
 			</div>
-			
+
 			<!-- Conversion Error -->
 			{#if conversionError}
-				<div class="mb-4 text-center text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+				<div class="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-center text-red-600">
 					{conversionError}
 				</div>
 			{/if}
 
 			<!-- Processed Images Container -->
-			<div class="processed-images-container p-4 overflow-x-auto whitespace-nowrap bg-white border border-gray-200 rounded-md">
-				<h4 class="text-sm font-medium text-gray-700 mb-2">Final Processed Results:</h4>
+			<div
+				class="processed-images-container overflow-x-auto rounded-md border border-gray-200 bg-white p-4 whitespace-nowrap"
+			>
+				<h4 class="mb-2 text-sm font-medium text-gray-700">Final Processed Results:</h4>
 			</div>
 
 			<!-- Add selection instruction -->
-			<div class="mb-4 text-sm text-gray-600">
-				點擊轉向後的圖以選擇作文
-			</div>
+			<div class="mb-4 text-sm text-gray-600">點擊轉向後的圖以選擇作文</div>
 		</div>
 	</div>
 {/if}

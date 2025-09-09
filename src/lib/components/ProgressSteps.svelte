@@ -31,9 +31,7 @@
 	}
 
 	function getConnectorClasses(stepIndex: number) {
-		return stepIndex < currentStep 
-			? 'bg-green-600' 
-			: 'bg-gray-300';
+		return stepIndex < currentStep ? 'bg-green-600' : 'bg-gray-300';
 	}
 </script>
 
@@ -44,12 +42,18 @@
 				<li class="flex items-center {index === steps.length - 1 ? 'flex-shrink-0' : 'flex-1'}">
 					<!-- Step Circle -->
 					<div class="flex items-center">
-						<div 
-							class="flex items-center justify-center w-10 h-10 border-2 rounded-full transition-colors duration-200 {getStepClasses(getStepStatus(index))}"
+						<div
+							class="flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors duration-200 {getStepClasses(
+								getStepStatus(index)
+							)}"
 						>
 							{#if getStepStatus(index) === 'completed'}
-								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-									<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+								<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+									<path
+										fill-rule="evenodd"
+										d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+										clip-rule="evenodd"
+									/>
 								</svg>
 							{:else}
 								<span class="text-sm font-medium">
@@ -57,7 +61,7 @@
 								</span>
 							{/if}
 						</div>
-						
+
 						<!-- Step Content -->
 						<div class="ml-4 min-w-0 flex-1">
 							<p class="text-sm font-medium text-gray-800">
@@ -71,7 +75,11 @@
 
 					<!-- Connector Line -->
 					{#if index < steps.length - 1}
-						<div class="flex-1 mx-4 h-0.5 transition-colors duration-200 {getConnectorClasses(index + 1)}"></div>
+						<div
+							class="mx-4 h-0.5 flex-1 transition-colors duration-200 {getConnectorClasses(
+								index + 1
+							)}"
+						></div>
 					{/if}
 				</li>
 			{/each}
@@ -79,10 +87,10 @@
 	</nav>
 
 	<!-- Progress Bar -->
-	<div class="mt-6 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-		<div 
-			class="bg-gradient-to-r from-gray-300 to-gray-400 h-2 rounded-full transition-all duration-300 ease-out"
-			style="width: {((currentStep) / (steps.length - 1)) * 100}%"
+	<div class="mt-6 h-2 w-full overflow-hidden rounded-full bg-gray-200">
+		<div
+			class="h-2 rounded-full bg-gradient-to-r from-gray-300 to-gray-400 transition-all duration-300 ease-out"
+			style="width: {(currentStep / (steps.length - 1)) * 100}%"
 		></div>
 	</div>
 </div>

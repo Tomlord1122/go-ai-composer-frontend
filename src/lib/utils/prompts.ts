@@ -1,5 +1,4 @@
-export const textExtractorPrompt = 
-`
+export const textExtractorPrompt = `
 【閱讀規則】
 圖中為橫排中文手寫作文，請按圖片水平由左至右、由上而下閱讀；
 一行最左空兩格視為新段落，連續兩行以上留白即文章結束。
@@ -42,4 +41,4 @@ export const textExtractorPrompt =
 • …
 • …
 \`\`\`
-`
+`;

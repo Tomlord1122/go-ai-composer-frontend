@@ -33,7 +33,7 @@
 
 		isProcessing = true;
 		error = '';
-		
+
 		try {
 			console.log('Selected image:', {
 				index: selectedPageIndex,
@@ -47,7 +47,7 @@
 			}
 
 			const result = await extractTextFromImage(selectedImage, modelConfig, customPrompt);
-			
+
 			if (result.error) throw new Error(result.error);
 			extractedText = result.text;
 			onextractioncomplete(result.text);
@@ -60,22 +60,22 @@
 </script>
 
 <div class="mb-6">
-	<div class="flex justify-between items-center mb-4">
-		<h2 class="text-xl font-serif font-semibold text-gray-800 m-0">批改結果</h2>
-		<button 
+	<div class="mb-4 flex items-center justify-between">
+		<h2 class="m-0 font-serif text-xl font-semibold text-gray-800">批改結果</h2>
+		<button
 			onclick={handleExtraction}
 			disabled={isProcessing || !images?.length}
-			class="px-4 py-2 text-white border-none rounded-md cursor-pointer text-sm transition-colors duration-200
-				{isProcessing || !images?.length 
-					? 'bg-gray-400 cursor-not-allowed' 
-					: 'bg-blue-600 hover:bg-blue-700'}"
+			class="cursor-pointer rounded-md border-none px-4 py-2 text-sm text-white transition-colors duration-200
+				{isProcessing || !images?.length
+				? 'cursor-not-allowed bg-gray-400'
+				: 'bg-blue-600 hover:bg-blue-700'}"
 		>
 			{isProcessing ? '正在批改中...' : '開始批改'}
 		</button>
 	</div>
 
 	{#if error}
-		<div class="text-red-600 mb-4 text-sm bg-red-50 border border-red-200 rounded-md p-3">
+		<div class="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
 			{error}
 		</div>
 	{/if}
@@ -84,8 +84,8 @@
 		bind:value={extractedText}
 		rows="15"
 		placeholder="批改結果將顯示在此處..."
-		class="w-full p-3 border border-gray-300 rounded-md font-sans text-sm leading-relaxed resize-vertical box-border 
-			focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+		class="resize-vertical box-border w-full rounded-md border border-gray-300 p-3 font-sans text-sm leading-relaxed
+			transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 		style="font-family: 'Microsoft JhengHei', sans-serif;"
 	></textarea>
 </div>
