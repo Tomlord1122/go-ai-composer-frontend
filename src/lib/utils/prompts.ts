@@ -17,7 +17,7 @@ export const textExtractorPrompt = `【閱讀規則】
 - 如內容分已達 6，墨水分僅作備註，不再加成。
 
 【回覆格式（務必遵守）】
-\`\`\`
+
 【全文】
 <逐字轉寫內容>
 
@@ -39,5 +39,4 @@ export const textExtractorPrompt = `【閱讀規則】
 • …
 • …
 • …
-\`\`\`
 `;
