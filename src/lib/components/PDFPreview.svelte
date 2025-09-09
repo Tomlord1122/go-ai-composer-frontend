@@ -119,18 +119,24 @@
 		}
 	}
 
-	// Set up preview URL when file changes (but don't auto-convert)
+	// Track previous file to avoid re-processing
+	let previousFile: File | null = null;
+
+	// Set up preview URL and auto-convert PDF when file changes (like original Vue version)
 	$effect(() => {
-		if (file) {
+		if (file && file !== previousFile) {
 			console.log('newFile', file);
+			previousFile = file;
+			
 			if (previewUrl) {
 				URL.revokeObjectURL(previewUrl);
 			}
 			conversionError = null;
 
-			if (file && file.type === 'application/pdf') {
+			if (file.type === 'application/pdf') {
 				previewUrl = URL.createObjectURL(file);
-				// Don't auto-convert - wait for processTrigger
+				// Auto-convert PDF to images (like original Vue version)
+				convertPDFToImages(file);
 			} else {
 				previewUrl = '';
 				imageFiles = [];
@@ -138,29 +144,18 @@
 		}
 	});
 
+	// Track previous trigger to avoid re-processing
+	let previousTrigger = 0;
+
 	// Process images when trigger changes
 	$effect(() => {
-		if (processTrigger > 0) {
-			handleProcessingTrigger();
-		}
-	});
-
-	async function handleProcessingTrigger() {
-		// First convert PDF to images if not already converted
-		if (!converted && file && file.type === 'application/pdf') {
-			try {
-				await convertPDFToImages(file);
-			} catch (error) {
-				console.error('Failed to convert PDF:', error);
-				return;
+		if (processTrigger > 0 && processTrigger !== previousTrigger) {
+			previousTrigger = processTrigger;
+			if (converted && imageFiles.length > 0) {
+				processImagesAsync();
 			}
 		}
-		
-		// Then process the images
-		if (converted && imageFiles.length > 0) {
-			await processImagesAsync();
-		}
-	}
+	});
 
 	async function processImagesAsync() {
 		if (imageFiles.length > 0 && rows > 0 && pageColumns.length > 0) {

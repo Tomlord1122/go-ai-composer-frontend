@@ -46,20 +46,21 @@
 	let cols = $state(0);
 	let extractedText = $state('');
 
-	// Watch for changes in pagesPerArticle, useUniformColumns, and cols
+	// Use derived state for pageColumns to avoid infinite loops
 	$effect(() => {
 		if (useUniformColumns) {
-			pageColumns = Array(pagesPerArticle).fill(cols);
-		} else {
-			// Preserve existing values when switching to individual columns
-			const currentCols = [...pageColumns];
-			const newColumns = Array(pagesPerArticle)
-				.fill(0)
-				.map((_, i) => currentCols[i] || 0);
-			
-			// Only update if the array length changed
-			if (newColumns.length !== pageColumns.length) {
+			const newColumns = Array(pagesPerArticle).fill(cols);
+			// Only update if actually different
+			if (JSON.stringify(newColumns) !== JSON.stringify(pageColumns)) {
 				pageColumns = newColumns;
+			}
+		} else {
+			// Only update array length if needed
+			if (pageColumns.length !== pagesPerArticle) {
+				const currentCols = [...pageColumns];
+				pageColumns = Array(pagesPerArticle)
+					.fill(0)
+					.map((_, i) => currentCols[i] || 0);
 			}
 		}
 	});
