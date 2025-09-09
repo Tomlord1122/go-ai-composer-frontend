@@ -53,7 +53,9 @@
 			const pdf = (await getPDF(file)) as PDFDocumentProxy;
 			console.log('Conversion complete');
 			canvases = new Array(pdf.numPages).fill(null);
-			imageFiles = []; // Reset image files array
+			
+			// Use temporary array to collect all files, then assign once
+			const tempImageFiles: File[] = [];
 
 			for (let i = 0; i < pdf.numPages; i++) {
 				await tick();
@@ -97,7 +99,7 @@
 					}
 
 					const file = new File([blob], `page-${i + 1}.png`, { type: 'image/png' });
-					imageFiles.push(file);
+					tempImageFiles.push(file);
 					console.log(`Successfully converted page ${i + 1} to image`);
 				} catch (blobError) {
 					console.error(`Error converting canvas to blob for page ${i + 1}:`, blobError);
@@ -105,11 +107,14 @@
 				}
 			}
 
+			// Assign all files at once to trigger reactivity
+			imageFiles = tempImageFiles;
+			converted = true;
+			
 			console.log(
 				'All pages converted:',
 				imageFiles.map((f) => f.name)
 			);
-			converted = true;
 		} catch (error) {
 			console.error('Error converting PDF:', error);
 			conversionError = error instanceof Error ? error.message : 'Conversion failed';
@@ -149,16 +154,38 @@
 
 	// Process images when trigger changes
 	$effect(() => {
+		console.log('Process trigger effect:', {
+			processTrigger,
+			previousTrigger,
+			converted,
+			imageFilesLength: imageFiles.length,
+			rows,
+			pageColumnsLength: pageColumns.length
+		});
+		
 		if (processTrigger > 0 && processTrigger !== previousTrigger) {
 			previousTrigger = processTrigger;
+			console.log('Processing trigger detected, checking conditions...');
+			
 			if (converted && imageFiles.length > 0) {
+				console.log('Starting image processing...');
 				processImagesAsync();
+			} else {
+				console.log('Not processing - converted:', converted, 'imageFiles:', imageFiles.length);
 			}
 		}
 	});
 
 	async function processImagesAsync() {
+		console.log('processImagesAsync called with:', {
+			imageFilesLength: imageFiles.length,
+			rows,
+			pageColumnsLength: pageColumns.length,
+			pageColumns: pageColumns
+		});
+		
 		if (imageFiles.length > 0 && rows > 0 && pageColumns.length > 0) {
+			console.log('Starting image processing loop...');
 			// Reset state before reprocessing
 			selectedPages = [];
 			processedImageFiles = [];
