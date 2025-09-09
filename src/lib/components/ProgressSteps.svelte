@@ -1,0 +1,88 @@
+<script lang="ts">
+	interface Step {
+		id: string;
+		title: string;
+		description: string;
+	}
+
+	interface Props {
+		steps: Step[];
+		currentStep: number;
+	}
+
+	let { steps, currentStep }: Props = $props();
+
+	function getStepStatus(stepIndex: number) {
+		if (stepIndex < currentStep) return 'completed';
+		if (stepIndex === currentStep) return 'current';
+		return 'upcoming';
+	}
+
+	function getStepClasses(status: string) {
+		switch (status) {
+			case 'completed':
+				return 'bg-green-600 text-white border-green-600';
+			case 'current':
+				return 'bg-blue-600 text-white border-blue-600';
+			case 'upcoming':
+			default:
+				return 'bg-white text-gray-500 border-gray-300';
+		}
+	}
+
+	function getConnectorClasses(stepIndex: number) {
+		return stepIndex < currentStep 
+			? 'bg-green-600' 
+			: 'bg-gray-300';
+	}
+</script>
+
+<div class="w-full py-6">
+	<nav aria-label="進度指示器">
+		<ol class="flex items-center justify-between">
+			{#each steps as step, index}
+				<li class="flex items-center {index === steps.length - 1 ? 'flex-shrink-0' : 'flex-1'}">
+					<!-- Step Circle -->
+					<div class="flex items-center">
+						<div 
+							class="flex items-center justify-center w-10 h-10 border-2 rounded-full transition-colors duration-200 {getStepClasses(getStepStatus(index))}"
+						>
+							{#if getStepStatus(index) === 'completed'}
+								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+								</svg>
+							{:else}
+								<span class="text-sm font-medium">
+									{index + 1}
+								</span>
+							{/if}
+						</div>
+						
+						<!-- Step Content -->
+						<div class="ml-4 min-w-0 flex-1">
+							<p class="text-sm font-medium text-gray-800">
+								{step.title}
+							</p>
+							<p class="text-xs text-gray-500">
+								{step.description}
+							</p>
+						</div>
+					</div>
+
+					<!-- Connector Line -->
+					{#if index < steps.length - 1}
+						<div class="flex-1 mx-4 h-0.5 transition-colors duration-200 {getConnectorClasses(index + 1)}"></div>
+					{/if}
+				</li>
+			{/each}
+		</ol>
+	</nav>
+
+	<!-- Progress Bar -->
+	<div class="mt-6 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+		<div 
+			class="bg-gradient-to-r from-gray-300 to-gray-400 h-2 rounded-full transition-all duration-300 ease-out"
+			style="width: {((currentStep) / (steps.length - 1)) * 100}%"
+		></div>
+	</div>
+</div>
