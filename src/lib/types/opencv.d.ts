@@ -12,7 +12,10 @@ declare module '@techstark/opencv-js' {
 	}
 
 	export interface Scalar {
-		new (r: number, g: number, b: number, a?: number): Scalar;
+		r: number;
+		g: number;
+		b: number;
+		a?: number;
 	}
 
 	export interface Mat {

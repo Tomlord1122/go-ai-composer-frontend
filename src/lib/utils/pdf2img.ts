@@ -3,6 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 export default async function pdfToImg(pdfFile: Blob) {
 	const reader = new FileReader();
 	reader.readAsArrayBuffer(pdfFile);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const data: any = await new Promise((resolve) => {
 		reader.onload = () => {
 			resolve(reader.result);

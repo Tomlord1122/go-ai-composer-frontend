@@ -24,8 +24,6 @@
 		pagesPerArticle,
 		pageColumns,
 		processTrigger,
-		selectedIndex = 0,
-		disabled = false,
 		onprocessedimages,
 		onselectedpages
 	}: Props = $props();
@@ -53,7 +51,7 @@
 			const pdf = (await getPDF(file)) as PDFDocumentProxy;
 			console.log('Conversion complete');
 			canvases = new Array(pdf.numPages).fill(null);
-			
+
 			// Use temporary array to collect all files, then assign once
 			const tempImageFiles: File[] = [];
 
@@ -110,7 +108,7 @@
 			// Assign all files at once to trigger reactivity
 			imageFiles = tempImageFiles;
 			converted = true;
-			
+
 			console.log(
 				'All pages converted:',
 				imageFiles.map((f) => f.name)
@@ -132,7 +130,7 @@
 		if (file && file !== previousFile) {
 			console.log('newFile', file);
 			previousFile = file;
-			
+
 			if (previewUrl) {
 				URL.revokeObjectURL(previewUrl);
 			}
@@ -162,10 +160,10 @@
 			rows,
 			pageColumnsLength: pageColumns.length
 		});
-		
+
 		if (processTrigger > 0 && processTrigger !== previousTrigger) {
 			console.log('Processing trigger detected, checking conditions...');
-			
+
 			if (converted && imageFiles.length > 0) {
 				console.log('Starting image processing...');
 				previousTrigger = processTrigger; // Only update after we start processing
@@ -184,7 +182,7 @@
 			pageColumnsLength: pageColumns.length,
 			pageColumns: pageColumns
 		});
-		
+
 		if (imageFiles.length > 0 && rows > 0 && pageColumns.length > 0) {
 			console.log('Starting image processing loop...');
 			// Reset state before reprocessing
@@ -202,65 +200,65 @@
 			await tick();
 
 			for (let i = 0; i < imageFiles.length; i += pagesPerArticle) {
-					let results: Mat[] = Array(pagesPerArticle).fill(null);
-					let tempCanvas: HTMLCanvasElement[] = Array(pagesPerArticle).fill(null);
-					await tick();
-					try {
-						for (let j = 0; j < pagesPerArticle; j++) {
-							const pageIndex = i + j;
-							if (pageIndex >= imageFiles.length) break;
+				let results: Mat[] = Array(pagesPerArticle).fill(null);
+				let tempCanvas: HTMLCanvasElement[] = Array(pagesPerArticle).fill(null);
+				await tick();
+				try {
+					for (let j = 0; j < pagesPerArticle; j++) {
+						const pageIndex = i + j;
+						if (pageIndex >= imageFiles.length) break;
 
-							results[j] = await processImage(imageFiles[pageIndex], rows, pageColumns[j]);
-							tempCanvas[j] = document.createElement('canvas');
-							tempCanvas[j].width = results[j].cols;
-							tempCanvas[j].height = results[j].rows;
-							cv.imshow(tempCanvas[j], results[j]);
-						}
-
-						if (tempCanvas.every((canvas) => canvas !== null)) {
-							const fullMergedCanvas = document.createElement('canvas');
-							const maxWidth = Math.max(...results.map((result) => result.cols));
-							const totalHeight = results.reduce((sum, result) => sum + result.rows, 0);
-
-							fullMergedCanvas.width = maxWidth;
-							fullMergedCanvas.height = totalHeight;
-
-							const ctx = fullMergedCanvas.getContext('2d');
-							if (ctx) {
-								let currentY = 0;
-								for (let j = 0; j < pagesPerArticle; j++) {
-									if (tempCanvas[j] && results[j]) {
-										ctx.drawImage(tempCanvas[j], 0, currentY);
-										currentY += results[j].rows;
-									}
-								}
-								fullMergedCanvas.id = `processed-image-${i}-${i + results.length - 1}`;
-								fullMergedCanvas.style.border = '1px solid #ccc';
-								fullMergedCanvas.style.maxWidth = '100%';
-								fullMergedCanvas.style.height = 'auto';
-
-								const mergedBlob = await new Promise<Blob>((resolve) =>
-									fullMergedCanvas.toBlob((blob) => resolve(blob!), 'image/png')
-								);
-
-								const pageRange = Array.from(
-									{ length: results.length },
-									(_, idx) => i + idx + 1
-								).join('-');
-
-								processedImageFiles.push(
-									new File([mergedBlob], `pages-${pageRange}.png`, { type: 'image/png' })
-								);
-
-								appendCanvasWithPageNumber(fullMergedCanvas, i);
-							}
-						}
-					} finally {
-						results.forEach((result) => {
-							if (result) result.delete();
-						});
+						results[j] = await processImage(imageFiles[pageIndex], rows, pageColumns[j]);
+						tempCanvas[j] = document.createElement('canvas');
+						tempCanvas[j].width = results[j].cols;
+						tempCanvas[j].height = results[j].rows;
+						cv.imshow(tempCanvas[j], results[j]);
 					}
+
+					if (tempCanvas.every((canvas) => canvas !== null)) {
+						const fullMergedCanvas = document.createElement('canvas');
+						const maxWidth = Math.max(...results.map((result) => result.cols));
+						const totalHeight = results.reduce((sum, result) => sum + result.rows, 0);
+
+						fullMergedCanvas.width = maxWidth;
+						fullMergedCanvas.height = totalHeight;
+
+						const ctx = fullMergedCanvas.getContext('2d');
+						if (ctx) {
+							let currentY = 0;
+							for (let j = 0; j < pagesPerArticle; j++) {
+								if (tempCanvas[j] && results[j]) {
+									ctx.drawImage(tempCanvas[j], 0, currentY);
+									currentY += results[j].rows;
+								}
+							}
+							fullMergedCanvas.id = `processed-image-${i}-${i + results.length - 1}`;
+							fullMergedCanvas.style.border = '1px solid #ccc';
+							fullMergedCanvas.style.maxWidth = '100%';
+							fullMergedCanvas.style.height = 'auto';
+
+							const mergedBlob = await new Promise<Blob>((resolve) =>
+								fullMergedCanvas.toBlob((blob) => resolve(blob!), 'image/png')
+							);
+
+							const pageRange = Array.from(
+								{ length: results.length },
+								(_, idx) => i + idx + 1
+							).join('-');
+
+							processedImageFiles.push(
+								new File([mergedBlob], `pages-${pageRange}.png`, { type: 'image/png' })
+							);
+
+							appendCanvasWithPageNumber(fullMergedCanvas, i);
+						}
+					}
+				} finally {
+					results.forEach((result) => {
+						if (result) result.delete();
+					});
 				}
+			}
 			await tick();
 			console.log('Calling onprocessedimages with', processedImageFiles.length, 'files');
 			onprocessedimages(processedImageFiles);

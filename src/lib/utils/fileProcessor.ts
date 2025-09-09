@@ -1,5 +1,4 @@
 import cv from '@techstark/opencv-js';
-import type { Mat, Point, MatVector } from '@techstark/opencv-js';
 
 const debug = false;
 
@@ -123,13 +122,14 @@ export async function processImage(file: File, rows: number, cols: number) {
 
 		// create a list to store contours area to sort them, and get the sorted indices
 		// where contour is a MatVector cannot use map
-		let areas = [];
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const areas: any[] = [];
 		for (let i = 0; i < contours.size(); i++) {
 			areas.push(cv.contourArea(contours.get(i)));
 		}
 		// sort the areas in descending order, though we only use the first one
 		// we keep this sort here for later use
-		let sortedIndices = areas.map((_, index) => index).sort((a, b) => areas[b] - areas[a]);
+		const sortedIndices = areas.map((_, index) => index).sort((a, b) => areas[b] - areas[a]);
 		contourMatVec.push_back(contours.get(sortedIndices[0]));
 		cv.drawContours(mat, contourMatVec, -1, new cv.Scalar(0, 255, 0), 3);
 		contourMatVec.delete();

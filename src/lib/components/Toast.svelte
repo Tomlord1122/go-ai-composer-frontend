@@ -62,46 +62,64 @@
 </script>
 
 {#if visible}
-	<div class="fixed top-4 right-4 z-50 w-full max-w-sm" transition:fly={{ x: 300, duration: 200 }}>
-		<div class="rounded-md border p-4 shadow-md {getTypeStyles(type)} transition-all duration-200">
-			<div class="flex items-center">
-				<div class="flex-shrink-0">
-					<svg
-						class="h-5 w-5"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-						aria-hidden="true"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d={getIconPath(type)}
-						/>
-					</svg>
-				</div>
-				<div class="ml-3 flex-1">
-					<p class="text-sm font-medium">
-						{message}
-					</p>
-				</div>
-				<div class="ml-4 flex-shrink-0">
-					<button
-						type="button"
-						onclick={handleClose}
-						class="inline-flex rounded-md p-1.5 transition-colors duration-150 hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
-						aria-label="關閉通知"
-					>
-						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	<div
+		class="pointer-events-none fixed inset-0 z-50 flex items-start justify-end p-4 sm:p-6"
+		transition:fly={{ x: 300, duration: 200 }}
+	>
+		<div
+			class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg shadow-lg {getTypeStyles(
+				type
+			)} transition-all duration-200"
+			role="alert"
+			aria-live="assertive"
+			aria-atomic="true"
+		>
+			<div class="p-4">
+				<div class="flex items-start">
+					<div class="flex-shrink-0">
+						<svg
+							class="h-5 w-5"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+							aria-hidden="true"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
 								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
+								d={getIconPath(type)}
 							/>
 						</svg>
-					</button>
+					</div>
+					<div class="ml-3 w-0 flex-1 pt-0.5">
+						<p class="text-sm font-medium">
+							{message}
+						</p>
+					</div>
+					<div class="ml-4 flex flex-shrink-0">
+						<button
+							type="button"
+							onclick={handleClose}
+							class="inline-flex rounded-md text-gray-400 transition-colors duration-150 hover:text-gray-500 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
+							aria-label="關閉通知"
+						>
+							<svg
+								class="h-5 w-5"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								aria-hidden="true"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
+							</svg>
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>

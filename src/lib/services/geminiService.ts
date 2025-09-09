@@ -69,3 +69,43 @@ function fileToBase64(file: File): Promise<string> {
 		reader.onerror = (error) => reject(error);
 	});
 }
+
+// New streaming function for typewriter effect
+export async function extractTextFromImageStream(
+	imageFile: File,
+	modelConfig: { model: string },
+	customPrompt?: string,
+	onChunk?: (chunk: string) => void,
+	onComplete?: (fullText: string) => void,
+	onError?: (error: string) => void
+): Promise<void> {
+	try {
+		const model = genAI.getGenerativeModel({ model: modelConfig.model });
+
+		// Convert image to GenerativeContent
+		const imageData = await fileToGenerativePart(imageFile);
+
+		// Use the provided evaluation prompt (should contain grading rules)
+		if (!customPrompt) {
+			throw new Error('No evaluation prompt provided');
+		}
+
+		console.log('Using evaluation prompt for streaming analysis');
+
+		// Make streaming request to Gemini with evaluation prompt
+		const result = await model.generateContentStream([customPrompt, imageData]);
+
+		let fullText = '';
+
+		for await (const chunk of result.stream) {
+			const chunkText = chunk.text();
+			fullText += chunkText;
+			onChunk?.(chunkText);
+		}
+
+		onComplete?.(fullText);
+	} catch (error) {
+		console.error('Gemini API streaming error:', error);
+		onError?.(error instanceof Error ? error.message : '發生未知錯誤');
+	}
+}

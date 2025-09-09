@@ -36,27 +36,38 @@
 </script>
 
 <div class="w-full py-6">
-	<nav aria-label="進度指示器">
+	<nav
+		aria-label="進度指示器"
+		role="progressbar"
+		aria-valuenow={currentStep + 1}
+		aria-valuemin="1"
+		aria-valuemax={steps.length}
+	>
 		<ol class="flex items-center justify-between">
-			{#each steps as step, index}
-				<li class="flex items-center {index === steps.length - 1 ? 'flex-shrink-0' : 'flex-1'}">
+			{#each steps as step, index (step.id)}
+				<li
+					class="flex items-center {index === steps.length - 1 ? 'flex-shrink-0' : 'flex-1'}"
+					role="presentation"
+				>
 					<!-- Step Circle -->
 					<div class="flex items-center">
 						<div
-							class="flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors duration-200 {getStepClasses(
+							class="flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors duration-150 {getStepClasses(
 								getStepStatus(index)
 							)}"
+							aria-current={getStepStatus(index) === 'current' ? 'step' : undefined}
 						>
 							{#if getStepStatus(index) === 'completed'}
-								<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+								<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
 									<path
 										fill-rule="evenodd"
 										d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
 										clip-rule="evenodd"
 									/>
 								</svg>
+								<span class="sr-only">已完成</span>
 							{:else}
-								<span class="text-sm font-medium">
+								<span class="text-sm font-medium" aria-label="步驟 {index + 1}">
 									{index + 1}
 								</span>
 							{/if}
@@ -76,9 +87,10 @@
 					<!-- Connector Line -->
 					{#if index < steps.length - 1}
 						<div
-							class="mx-4 h-0.5 flex-1 transition-colors duration-200 {getConnectorClasses(
+							class="mx-4 h-0.5 flex-1 transition-colors duration-150 {getConnectorClasses(
 								index + 1
 							)}"
+							aria-hidden="true"
 						></div>
 					{/if}
 				</li>
@@ -87,10 +99,17 @@
 	</nav>
 
 	<!-- Progress Bar -->
-	<div class="mt-6 h-2 w-full overflow-hidden rounded-full bg-gray-200">
+	<div class="mt-6 h-2 w-full overflow-hidden rounded-full bg-gray-200" role="presentation">
 		<div
-			class="h-2 rounded-full bg-blue-400 transition-all duration-300 ease-out"
+			class="h-2 rounded-full bg-gradient-to-r from-gray-300 to-gray-400 transition-all duration-300 ease-out"
 			style="width: {(currentStep / (steps.length - 1)) * 100}%"
+			aria-hidden="true"
 		></div>
+	</div>
+
+	<!-- Screen Reader Progress Info -->
+	<div class="sr-only">
+		進度：第 {currentStep + 1} 步，共 {steps.length} 步。目前在{steps[currentStep]?.title ||
+			''}階段。
 	</div>
 </div>

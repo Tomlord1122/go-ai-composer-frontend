@@ -72,6 +72,7 @@
 		"@google/generative-ai": "^0.21.0",
 		"@techstark/opencv-js": "4.10.0-release.1",
 		"jszip": "^3.10.1",
+		"marked": "^16.2.1",
 		"pdfjs-dist": "^4.10.38"
 	}
 }
