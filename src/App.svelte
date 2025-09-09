@@ -7,7 +7,7 @@
 <ToastContainer />
 
 <!-- Test File Download Section -->
-<div class="fixed bottom-4 left-4 z-40 opacity-20 hover:opacity-100 hover:cursor-pointer hover:translate-x-2 transition-all duration-300 ease-out transform translate-x-[-150px] ">
+<div class="fixed bottom-4 left-4 z-40 opacity-20 hover:opacity-100 hover:cursor-pointer hover:translate-x-2 transition-all duration-300 ease-out transform ">
 	<div class="max-w-xs rounded-lg border border-gray-300 bg-white p-4 shadow-lg">
 		<h3 class="mb-2 font-serif text-sm font-semibold text-gray-800">測試檔案</h3>
 		<a
