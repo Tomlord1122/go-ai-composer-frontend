@@ -89,7 +89,7 @@
 	<!-- Progress Bar -->
 	<div class="mt-6 h-2 w-full overflow-hidden rounded-full bg-gray-200">
 		<div
-			class="h-2 rounded-full bg-gradient-to-r from-gray-300 to-gray-400 transition-all duration-300 ease-out"
+			class="h-2 rounded-full bg-blue-400 transition-all duration-300 ease-out"
 			style="width: {(currentStep / (steps.length - 1)) * 100}%"
 		></div>
 	</div>

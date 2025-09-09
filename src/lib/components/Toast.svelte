@@ -64,7 +64,7 @@
 {#if visible}
 	<div class="fixed top-4 right-4 z-50 w-full max-w-sm" transition:fly={{ x: 300, duration: 200 }}>
 		<div class="rounded-md border p-4 shadow-md {getTypeStyles(type)} transition-all duration-200">
-			<div class="flex items-start">
+			<div class="flex items-center">
 				<div class="flex-shrink-0">
 					<svg
 						class="h-5 w-5"
