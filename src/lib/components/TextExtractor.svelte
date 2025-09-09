@@ -58,10 +58,11 @@
 					extractedText += chunk;
 				},
 				(fullText: string) => {
-					// Handle completion - don't overwrite, just update state
+					// Handle completion - only update streaming state, don't touch extractedText
 					console.log('Streaming complete, full text length:', fullText.length);
+					console.log('Current extractedText length:', extractedText.length);
 					isStreaming = false;
-					onextractioncomplete(fullText);
+					onextractioncomplete(extractedText); // Use accumulated text, not fullText
 				},
 				(errorMsg: string) => {
 					// Handle error

@@ -11,8 +11,6 @@
 	let { content, isStreaming, typewriterSpeed = 20 }: Props = $props();
 
 	let displayedContent = $state('');
-	let currentIndex = $state(0);
-	let isTyping = $state(false);
 
 	// Configure marked for better Chinese text handling
 	marked.setOptions({
@@ -20,49 +18,16 @@
 		gfm: true
 	});
 
-	// Typewriter effect
+	// Simple effect to update displayed content
 	$effect(() => {
-		if (content && isStreaming && !isTyping) {
-			startTypewriter();
-		} else if (!isStreaming) {
-			// If not streaming, show content immediately
+		if (isStreaming) {
+			// During streaming, show content as it comes (real-time)
+			displayedContent = content;
+		} else {
+			// When not streaming, show full content immediately
 			displayedContent = content;
 		}
 	});
-
-	async function startTypewriter() {
-		isTyping = true;
-		currentIndex = 0;
-		displayedContent = '';
-
-		while (currentIndex < content.length) {
-			displayedContent += content[currentIndex];
-			currentIndex++;
-			await new Promise((resolve) => setTimeout(resolve, typewriterSpeed));
-			await tick();
-		}
-
-		isTyping = false;
-	}
-
-	// Handle streaming updates
-	$effect(() => {
-		if (isStreaming && content !== displayedContent && !isTyping) {
-			// If new content arrives while streaming, append it with typewriter effect
-			const newContent = content.slice(displayedContent.length);
-			if (newContent) {
-				appendWithTypewriter(newContent);
-			}
-		}
-	});
-
-	async function appendWithTypewriter(newContent: string) {
-		for (let i = 0; i < newContent.length; i++) {
-			displayedContent += newContent[i];
-			await new Promise((resolve) => setTimeout(resolve, typewriterSpeed));
-			await tick();
-		}
-	}
 </script>
 
 <!-- Display content in textarea-like format -->
@@ -79,7 +44,7 @@
 	></textarea>
 
 	<!-- Typing indicator -->
-	{#if isStreaming || isTyping}
+	{#if isStreaming}
 		<div
 			class="absolute right-3 bottom-3 flex items-center space-x-2 rounded-md bg-white/90 px-2 py-1 shadow-sm"
 			aria-live="polite"

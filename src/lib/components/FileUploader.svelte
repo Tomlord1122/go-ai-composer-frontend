@@ -22,7 +22,7 @@
 		{ value: 'gemini-1.5-flash-8b', label: 'Gemini 1.5 Flash 8B' },
 		{ value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
 		{ value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash Exp' },
-		{ value: 'gemini-2.0-pro-exp-02-05', label: 'Gemini 2.0 Pro Exp' },
+		{ value: 'gemini-2.0-pro-exp-02-05', label: 'Gemini 2.0 Pro Exp' }
 	];
 	let selectedModel = $state('gemini-1.5-flash');
 
@@ -41,7 +41,9 @@
 		} else {
 			// Preserve existing values when switching to individual columns
 			const currentCols = [...pageColumns];
-			pageColumns = Array(pagesPerArticle).fill(0).map((_, i) => currentCols[i] || 0);
+			pageColumns = Array(pagesPerArticle)
+				.fill(0)
+				.map((_, i) => currentCols[i] || 0);
 		}
 	});
 
@@ -56,12 +58,12 @@
 		const input = event.target as HTMLInputElement;
 		if (input.files && input.files[0]) {
 			const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-			
+
 			if (!validTypes.includes(input.files[0].type)) {
 				error = '請上傳 JPG、PNG 或 PDF 檔案';
 				return;
 			}
-			
+
 			files = Array.from(input.files);
 			error = '';
 			processedImages = [];
@@ -82,19 +84,19 @@
 	async function handleDownloadAll() {
 		try {
 			const zip = new JSZip();
-			
+
 			processedImages.forEach((file, index) => {
 				zip.file(`page-${index + 1}.png`, file);
 			});
-			
+
 			const content = await zip.generateAsync({
-				type: "blob",
-				compression: "DEFLATE",
+				type: 'blob',
+				compression: 'DEFLATE',
 				compressionOptions: {
 					level: 6
 				}
 			});
-			
+
 			const link = document.createElement('a');
 			link.href = URL.createObjectURL(content);
 			link.download = files[0].name.replace(/\.[^.]+$/, '') + '.zip';
@@ -117,8 +119,8 @@
 			error = '請輸入有效的列數（大於 0）';
 			return;
 		}
-		
-		if (!pageColumns.every(col => col > 0)) {
+
+		if (!pageColumns.every((col) => col > 0)) {
 			error = '請確保每頁的行數都大於 0';
 			return;
 		}
@@ -133,33 +135,38 @@
 	}
 </script>
 
-<div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md border border-gray-300">
-	<h2 class="text-2xl font-serif font-bold mb-6 text-gray-800 border-b border-gray-400 pb-2">改作文gem</h2>
+<div class="mx-auto max-w-2xl rounded-lg border border-gray-300 bg-white p-6 shadow-md">
+	<h2 class="mb-6 border-b border-gray-400 pb-2 font-serif text-2xl font-bold text-gray-800">
+		改作文gem
+	</h2>
 	<div class="prose prose-sm mb-6 text-gray-700">
 		<p>
-			請上傳一個 PDF 檔案，或圖片最多兩張(正反面(todo))。上傳會先顯示預覽，確定無誤再轉向。最後再送出給 AI 評分。
+			請上傳一個 PDF
+			檔案，或圖片最多兩張(正反面(todo))。上傳會先顯示預覽，確定無誤再轉向。最後再送出給 AI 評分。
 			PDF 若需重新輸入資訊，請重整頁面重新上傳。若轉向圖有問題，請確保網格明確。
 		</p>
 	</div>
-	
+
 	<!-- Error Display -->
 	{#if error}
-		<div class="mb-4 text-red-600 text-sm bg-red-50 border border-red-200 rounded-md p-3">
+		<div class="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
 			{error}
 		</div>
 	{/if}
-	
+
 	<!-- File Upload -->
 	<div class="mb-6">
-		<label for="file-upload" class="block text-gray-700 mb-2 font-medium">上傳檔案 (JPG, PNG, 或 PDF)</label>
+		<label for="file-upload" class="mb-2 block font-medium text-gray-700"
+			>上傳檔案 (JPG, PNG, 或 PDF)</label
+		>
 		<input
 			id="file-upload"
 			type="file"
 			accept=".jpg,.jpeg,.png,.pdf"
 			onchange={handleChange}
-			class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+			class="w-full rounded-md border border-gray-300 p-2 transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 			multiple
-		>
+		/>
 	</div>
 
 	<!-- Input Fields -->
@@ -167,23 +174,25 @@
 		<!-- Pages per Article -->
 		<div class="grid grid-cols-2 gap-4">
 			<div>
-				<label for="pages-per-article" class="block text-gray-700 mb-2 font-medium">每篇文章頁數</label>
-				<input 
+				<label for="pages-per-article" class="mb-2 block font-medium text-gray-700"
+					>每篇文章頁數</label
+				>
+				<input
 					id="pages-per-article"
-					type="number" 
-					min="1" 
+					type="number"
+					min="1"
 					bind:value={pagesPerArticle}
-					class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+					class="w-full rounded-md border border-gray-300 p-2 transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				/>
 			</div>
 			<div>
-				<label for="rows-input" class="block text-gray-700 mb-2 font-medium">列數</label>
-				<input 
+				<label for="rows-input" class="mb-2 block font-medium text-gray-700">列數</label>
+				<input
 					id="rows-input"
-					type="number" 
-					min="0" 
+					type="number"
+					min="0"
 					bind:value={rows}
-					class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+					class="w-full rounded-md border border-gray-300 p-2 transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				/>
 			</div>
 		</div>
@@ -196,37 +205,35 @@
 				id="uniformColumns"
 				class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 			/>
-			<label for="uniformColumns" class="text-gray-700 font-medium">
-				所有頁面使用相同行數
-			</label>
+			<label for="uniformColumns" class="font-medium text-gray-700"> 所有頁面使用相同行數 </label>
 		</div>
 
 		<!-- Uniform Columns Input -->
 		{#if useUniformColumns}
 			<div>
-				<label for="uniform-cols" class="block text-gray-700 mb-2 font-medium">每頁行數</label>
-				<input 
+				<label for="uniform-cols" class="mb-2 block font-medium text-gray-700">每頁行數</label>
+				<input
 					id="uniform-cols"
-					type="number" 
-					min="0" 
+					type="number"
+					min="0"
 					bind:value={cols}
-					class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+					class="w-full rounded-md border border-gray-300 p-2 transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				/>
 			</div>
 		{:else}
 			<!-- Individual Page Columns -->
-			<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+			<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
 				{#each Array(pagesPerArticle) as _, index}
 					<div>
-						<label for="page-cols-{index}" class="block text-gray-700 mb-2 font-medium">
+						<label for="page-cols-{index}" class="mb-2 block font-medium text-gray-700">
 							第 {index + 1} 頁行數
 						</label>
-						<input 
+						<input
 							id="page-cols-{index}"
-							type="number" 
-							min="0" 
+							type="number"
+							min="0"
 							bind:value={pageColumns[index]}
-							class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+							class="w-full rounded-md border border-gray-300 p-2 transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>
 				{/each}
@@ -235,18 +242,18 @@
 	</div>
 
 	<!-- Action Buttons -->
-	<div class="flex gap-2 mb-6">
-		<button 
+	<div class="mb-6 flex gap-2">
+		<button
 			onclick={handleInputSet}
-			class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200"
+			class="rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
 		>
 			轉向
 		</button>
 
-		<button 
+		<button
 			onclick={handleDownloadAll}
 			disabled={!processedImages?.length}
-			class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
+			class="rounded-md bg-green-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
 		>
 			Download All Images
 		</button>
@@ -269,11 +276,11 @@
 
 	<!-- Model Selection -->
 	<div class="mb-6">
-		<label for="model-select" class="block text-gray-700 mb-2 font-medium">Select Model</label>
-		<select 
+		<label for="model-select" class="mb-2 block font-medium text-gray-700">Select Model</label>
+		<select
 			id="model-select"
 			bind:value={selectedModel}
-			class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+			class="w-full rounded-md border border-gray-300 p-2 transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 		>
 			{#each modelOptions as option}
 				<option value={option.value}>
@@ -285,11 +292,11 @@
 
 	<!-- Prompt Input -->
 	<div class="mb-6">
-		<label for="custom-prompt" class="block text-gray-700 mb-2 font-medium">AI 批改 Prompt</label>
-		<input 
+		<label for="custom-prompt" class="mb-2 block font-medium text-gray-700">AI 批改 Prompt</label>
+		<input
 			id="custom-prompt"
 			bind:value={customPrompt}
-			class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+			class="w-full rounded-md border border-gray-300 p-2 transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 		/>
 	</div>
 
