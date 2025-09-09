@@ -99,15 +99,17 @@
 	}
 
 	function handleProcessedImages(images: File[]) {
-		console.log('Processed images:', images.length);
+		console.log('handleProcessedImages called with:', images.length, 'images');
+		console.log('Current isProcessing state:', isProcessing);
+		console.log('Current step:', currentStep);
+		
 		processedImages = images;
 		isProcessing = false;
-		toastStore.add('圖片轉換完成！', 'success');
+		toastStore.add('圖片轉換完成！請查看結果並選擇下一步操作', 'success');
 
-		// Auto advance to analyze step
-		if (currentStep === 2) {
-			currentStep = 3;
-		}
+		console.log('Updated isProcessing to false, processedImages length:', processedImages.length);
+
+		// Don't auto advance - let user manually choose next step
 	}
 
 	function handleSelectedPages(pageIndex: number) {
@@ -180,13 +182,31 @@
 	}
 
 	function goToStep(step: number) {
+		console.log('goToStep called with:', step, 'current step:', currentStep);
+		console.log('Conditions check:', {
+			stepLessOrEqual: step <= currentStep,
+			step1Available: step === 1 && files.length > 0,
+			step2Available: step === 2 && processedImages.length > 0,
+			step3Available: step === 3 && processedImages.length > 0
+		});
+		
 		if (
 			step <= currentStep ||
 			(step === 1 && files.length > 0) ||
-			(step === 2 && processedImages.length > 0)
+			(step === 2 && processedImages.length > 0) ||
+			(step === 3 && processedImages.length > 0)
 		) {
+			console.log('Advancing to step:', step);
 			currentStep = step;
+		} else {
+			console.log('Cannot advance to step', step, 'conditions not met');
 		}
+	}
+
+	function selectEssay(index: number) {
+		console.log('Selected essay index:', index);
+		selectedPageIndex = index;
+		toastStore.add(`已選擇作文 ${index + 1}`, 'info');
 	}
 
 	function resetWorkflow() {
@@ -204,7 +224,7 @@
 <div class="min-h-screen bg-[#EDEDED] py-8">
 	<div class="container mx-auto px-4 lg:max-w-screen-md">
 		<!-- Header -->
-		<div class="mb-8 text-center">
+		<div >
 			<h1 class="mb-2 font-serif text-3xl font-bold text-gray-800">改作文gem</h1>
 			<p class="prose prose-sm text-gray-600">
 				AI 驅動的中文作文批改系統，將直書作文轉換為橫書並提供專業評分
@@ -231,7 +251,10 @@
 			<!-- Step Content -->
 			{#if currentStep === 0}
 				<!-- Step 1: File Upload -->
-				<div transition:fly={{ x: -20, duration: 300 }}>
+				<div 
+					in:fly={{ y: 30, duration: 400, delay: 300 }}
+					out:fly={{ y: 30, duration: 300}}
+				>
 					<h2 class="mb-4 font-serif text-xl font-semibold text-gray-800">步驟 1: 上傳檔案</h2>
 					<div class="prose prose-sm mb-6 text-gray-700">
 						<p>請上傳一個 PDF 檔案或圖片（JPG、PNG 格式）。系統將自動處理並轉換為可分析的格式。</p>
@@ -251,7 +274,10 @@
 				</div>
 			{:else if currentStep === 1}
 				<!-- Step 2: Parameter Setup -->
-				<div transition:fly={{ x: -20, duration: 300 }}>
+				<div 
+					in:fly={{ y: 30, duration: 400, delay: 300 }}
+					out:fly={{ y: 30, duration: 300}}
+				>
 					<h2 class="mb-4 font-serif text-xl font-semibold text-gray-800">步驟 2: 設定參數</h2>
 					<div class="prose prose-sm mb-6 text-gray-700">
 						<p>請設定作文的網格參數，這將幫助系統正確識別和轉換文字方向。</p>
@@ -368,7 +394,10 @@
 				</div>
 			{:else if currentStep === 2}
 				<!-- Step 3: Processing -->
-				<div transition:fly={{ x: -20, duration: 300 }}>
+				<div 
+					in:fly={{ y: 30, duration: 400, delay: 300 }}
+					out:fly={{ y: 30, duration: 300}}
+				>
 					<h2 class="mb-4 font-serif text-xl font-semibold text-gray-800">步驟 3: 圖片轉換處理</h2>
 					<div class="prose prose-sm mb-6 text-gray-700">
 						<p>系統正在處理您的檔案，將直書文字轉換為橫書格式。請耐心等待...</p>
@@ -416,6 +445,36 @@
 						/>
 					{/if}
 
+					<!-- Processing Results Preview -->
+					{#if !isProcessing && processedImages.length > 0}
+						<div class="mt-6 rounded-md border border-green-200 bg-green-50 p-6">
+							<div class="text-center">
+								<svg class="mx-auto h-12 w-12 text-green-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+								</svg>
+								<h3 class="text-lg font-serif font-medium text-green-800 mb-2">轉換完成！</h3>
+								<p class="text-sm text-green-600 mb-6">
+									已成功轉換 {processedImages.length} 個檔案，直書作文已轉為橫書格式
+								</p>
+								
+								<div class="flex gap-3 justify-center">
+									<button
+										onclick={handleDownloadAll}
+										class="rounded-md bg-gray-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-gray-700"
+									>
+										下載圖片
+									</button>
+									<button
+										onclick={() => goToStep(3)}
+										class="rounded-md bg-blue-600 px-6 py-2 text-white transition-colors duration-200 hover:bg-blue-700 font-medium"
+									>
+										繼續進行 AI 批改
+									</button>
+								</div>
+							</div>
+						</div>
+					{/if}
+
 					<div class="mt-6 flex gap-3">
 						<button
 							onclick={() => goToStep(1)}
@@ -423,22 +482,65 @@
 						>
 							返回設定
 						</button>
-						<button
-							onclick={handleDownloadAll}
-							disabled={!processedImages?.length}
-							class="rounded-md bg-green-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
-						>
-							下載轉換圖片
-						</button>
 					</div>
 				</div>
 			{:else if currentStep === 3}
 				<!-- Step 4: AI Analysis -->
-				<div transition:fly={{ x: -20, duration: 300 }}>
+				<div 
+					in:fly={{ y: 30, duration: 400, delay: 300 }}
+					out:fly={{ y: 30, duration: 300}}
+				>
 					<h2 class="mb-4 font-serif text-xl font-semibold text-gray-800">步驟 4: AI 智能批改</h2>
 					<div class="prose prose-sm mb-6 text-gray-700">
 						<p>選擇要分析的頁面，系統將使用 AI 進行文字識別和專業批改。</p>
 					</div>
+
+					<!-- Essay Selection -->
+					{#if processedImages.length > 0}
+						<div class="mb-6">
+							<h4 class="mb-4 font-medium text-gray-700">選擇要分析的作文</h4>
+							<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+								{#each processedImages as image, index}
+									<button 
+										class="relative rounded-md border-2 transition-all duration-200 hover:shadow-md text-left
+											{selectedPageIndex === index 
+												? 'border-blue-500 bg-blue-50' 
+												: 'border-gray-300 bg-white hover:border-gray-400'}"
+										onclick={() => selectEssay(index)}
+										aria-label="選擇作文 {index + 1}"
+									>
+										<!-- Image Preview -->
+										<div class="aspect-[3/4] overflow-hidden rounded-t-md bg-gray-100">
+											<img 
+												src={URL.createObjectURL(image)}
+												alt="作文預覽 {index + 1}"
+												class="h-full w-full object-cover"
+											/>
+										</div>
+										
+										<!-- Image Info -->
+										<div class="p-3">
+											<p class="text-xs font-medium text-gray-700">
+												作文 {index + 1}
+											</p>
+											<p class="text-xs text-gray-500">
+												{Math.round(image.size / 1024)} KB
+											</p>
+										</div>
+
+										<!-- Selection Indicator -->
+										{#if selectedPageIndex === index}
+											<div class="absolute top-2 right-2 rounded-full bg-blue-600 p-1">
+												<svg class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+													<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+												</svg>
+											</div>
+										{/if}
+									</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
 
 					<!-- Model Selection -->
 					<div class="mb-6">

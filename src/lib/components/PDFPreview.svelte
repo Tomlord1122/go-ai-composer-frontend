@@ -164,14 +164,15 @@
 		});
 		
 		if (processTrigger > 0 && processTrigger !== previousTrigger) {
-			previousTrigger = processTrigger;
 			console.log('Processing trigger detected, checking conditions...');
 			
 			if (converted && imageFiles.length > 0) {
 				console.log('Starting image processing...');
+				previousTrigger = processTrigger; // Only update after we start processing
 				processImagesAsync();
 			} else {
 				console.log('Not processing - converted:', converted, 'imageFiles:', imageFiles.length);
+				// Don't update previousTrigger here - wait until we can actually process
 			}
 		}
 	});
@@ -261,6 +262,7 @@
 					}
 				}
 			await tick();
+			console.log('Calling onprocessedimages with', processedImageFiles.length, 'files');
 			onprocessedimages(processedImageFiles);
 		}
 	}
